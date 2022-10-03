@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: view-user
+---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   # "namespace" omitted since ClusterRoles are not namespaced
+#   name: pod-reader
+# rules:
+# - apiGroups: [""]
+#   #
+#   # at the HTTP level, the name of the resource for accessing Secret
+#   # objects is "secrets"
+#   # resources: ["namespaces","daemonsets","deployments","pods","pods/log","secrets","configmaps"]
+#   resources: ["namespaces","daemonsets","deployments","pods","pods/log","secrets","configmaps"]
+#   verbs: ["get", "watch", "list"]
+# ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-reader
+rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "*"
+  verbs:
+  # - create
+  # - delete
+  # - deletecollection
+  - get
+  - list
+  # - patch
+  # - proxy
+  # - redirect
+  # - replace
+  # - update
+  - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: view-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pod-reader
+subjects:
+- kind: ServiceAccount
+  name: view-user
+  namespace: default
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: view-sa-token
+  annotations:
+    kubernetes.io/service-account.name: view-user
+type: kubernetes.io/service-account-token
+
